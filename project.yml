@@ -1,6 +1,6 @@
 name: Yakala
 options:
-  bundleIdPrefix: com.yakala
+  bundleIdPrefix: com.drfrodo07
   deploymentTarget:
     iOS: "18.0"
   createIntermediateGroups: true
@@ -31,7 +31,7 @@ targets:
         product: WhisperKit
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.yakala.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.drfrodo07.yakala
         PRODUCT_NAME: Yakala
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
