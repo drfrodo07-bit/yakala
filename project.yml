@@ -1,0 +1,61 @@
+name: Yakala
+options:
+  bundleIdPrefix: com.yakala
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    SWIFT_STRICT_CONCURRENCY: minimal
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    CODE_SIGNING_ALLOWED: "NO"
+    CODE_SIGNING_REQUIRED: "NO"
+    CODE_SIGN_IDENTITY: ""
+    ENABLE_USER_SCRIPT_SANDBOXING: "NO"
+    DEAD_CODE_STRIPPING: "YES"
+packages:
+  WhisperKit:
+    url: https://github.com/argmaxinc/WhisperKit
+    exactVersion: 1.1.1
+targets:
+  Yakala:
+    type: application
+    platform: iOS
+    sources:
+      - path: Yakala
+    dependencies:
+      - package: WhisperKit
+        product: WhisperKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.yakala.app
+        PRODUCT_NAME: Yakala
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    info:
+      path: Yakala/Info.plist
+      properties:
+        CFBundleDisplayName: Yakala
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        UILaunchScreen: {}
+        UIApplicationSupportsIndirectInputEvents: true
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
+        ITSAppUsesNonExemptEncryption: false
+        NSPhotoLibraryAddUsageDescription: İndirdiğin ve altyazı eklediğin videoları Fotoğraflar'a kaydetmek için.
+        NSPhotoLibraryUsageDescription: Altyazı eklemek istediğin videoyu Fotoğraflar'dan seçmek için.
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight

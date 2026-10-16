@@ -1,0 +1,95 @@
+name: Yakala IPA
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ipa-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Xcode sürümü
+        run: xcodebuild -version
+
+      - name: XcodeGen kur
+        run: brew install xcodegen
+
+      - name: Xcode projesini oluştur
+        run: xcodegen generate
+
+      - name: Paketleri çöz
+        run: |
+          xcodebuild -resolvePackageDependencies -project Yakala.xcodeproj -scheme Yakala \
+            -skipPackagePluginValidation -skipMacroValidation
+
+      - name: Derle (imzasız)
+        run: |
+          set +e
+          xcodebuild build \
+            -project Yakala.xcodeproj \
+            -scheme Yakala \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" > build.log 2>&1
+          status=$?
+          set -e
+          if [ $status -ne 0 ]; then
+            echo "## Derleme hataları" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            grep -E "error:|fatal error" build.log | sort -u | head -80 | tee -a "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            tail -40 build.log
+            exit $status
+          fi
+          grep -E "warning:" build.log | grep "/Yakala/" | sort -u | head -40 || true
+          echo "Derleme başarılı"
+
+      - name: Derleme kaydını yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          if-no-files-found: ignore
+
+      - name: IPA paketle
+        run: |
+          APP=build/Build/Products/Release-iphoneos/Yakala.app
+          test -d "$APP"
+          mkdir -p Payload
+          cp -R "$APP" Payload/
+          zip -qry Yakala.ipa Payload
+          ls -lh Yakala.ipa
+
+      - name: IPA'yı yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Yakala-ipa
+          path: Yakala.ipa
+
+      - name: Release oluştur (kolay indirme)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Yakala (derleme ${{ github.run_number }})
+          make_latest: true
+          body: |
+            iPhone'a kurmak için **Yakala.ipa** dosyasını indirip Windows'ta Sideloadly ile yükleyin.
+          files: Yakala.ipa

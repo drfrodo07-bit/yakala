@@ -1,0 +1,8 @@
+build/
+DerivedData/
+Payload/
+*.ipa
+*.xcodeproj/
+Yakala/Info.plist
+.DS_Store
+xcuserdata/
