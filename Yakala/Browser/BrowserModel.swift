@@ -122,9 +122,27 @@ final class BrowserModel: NSObject, ObservableObject {
         addDetected(url: url, pageURL: page, title: title)
     }
 
-    func addDetected(url: URL, pageURL: URL?, title: String) {
+    static let ignoredExtensions: Set<String> = ["png", "jpg", "jpeg", "gif", "webp", "svg", "ico", "bmp", "avif", "css", "js", "json", "html", "htm", "vtt", "srt", "ts", "m4s", "key"]
+
+    /// Dosya adı için ana sayfanın başlığını kullan (oynatıcı çerçevesinin başlığı genelde anlamsızdır)
+    private func cleanTitle(_ frameTitle: String) -> String {
+        var title = (webView.title ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if title.isEmpty { title = frameTitle }
+        // "Dizi Adı 1. Bölüm izle - SiteAdı" → "Dizi Adı 1. Bölüm izle"
+        if let range = title.range(of: " - ", options: .backwards), title.distance(from: title.startIndex, to: range.lowerBound) > 8 {
+            title = String(title[..<range.lowerBound])
+        }
+        if let range = title.range(of: " | ", options: .backwards), title.distance(from: title.startIndex, to: range.lowerBound) > 8 {
+            title = String(title[..<range.lowerBound])
+        }
+        return title
+    }
+
+    func addDetected(url: URL, pageURL: URL?, title: String, fromMimeType: Bool = false) {
         guard let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https" else { return }
-        let resolvedTitle = title.isEmpty ? (webView.title ?? "") : title
+        // Resim, betik ve tek tek akış parçaları videonun kendisi değildir
+        if !fromMimeType, Self.ignoredExtensions.contains(url.pathExtension.lowercased()) { return }
+        let resolvedTitle = cleanTitle(title)
         let item = DetectedMedia(url: url, pageURL: pageURL ?? webView.url, pageTitle: resolvedTitle)
         guard !detected.contains(where: { $0.dedupeKey == item.dedupeKey }) else { return }
         if item.isHLS {
@@ -218,7 +236,7 @@ extension BrowserModel: WKNavigationDelegate {
         let url = navigationResponse.response.url
 
         if let url, mime.hasPrefix("video/") || mime.hasPrefix("audio/") || mime.contains("mpegurl") {
-            addDetected(url: url, pageURL: webView.url, title: webView.title ?? "")
+            addDetected(url: url, pageURL: webView.url, title: webView.title ?? "", fromMimeType: true)
         }
 
         if navigationResponse.canShowMIMEType {

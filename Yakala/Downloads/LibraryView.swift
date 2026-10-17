@@ -69,16 +69,42 @@ struct LibraryView: View {
                         Spacer()
                         status(for: item)
                     }
-                    if item.state == .running {
+                    switch item.state {
+                    case .running:
                         ProgressView(value: item.progress)
-                    } else if item.state == .converting {
+                        HStack {
+                            Text(FileStore.formattedSize(item.bytes))
+                            Spacer()
+                            Text(DownloadManager.formattedSpeed(item.speed))
+                        }
+                        .font(.caption2)
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                    case .converting:
+                        ProgressView(value: item.progress)
+                            .tint(.orange)
+                    case .preparing:
                         ProgressView()
                             .progressViewStyle(.linear)
+                    default:
+                        EmptyView()
                     }
                 }
-                .swipeActions {
-                    if item.state == .running {
+                .swipeActions(edge: .trailing) {
+                    if item.isActive {
                         Button("İptal", role: .destructive) { downloads.cancel(item.id) }
+                    } else {
+                        Button("Kaldır", role: .destructive) { downloads.remove(item.id) }
+                    }
+                }
+                .swipeActions(edge: .leading) {
+                    if item.isFailed, downloads.canRetry(item.id) {
+                        Button {
+                            downloads.retry(item.id)
+                        } label: {
+                            Label("Tekrar dene", systemImage: "arrow.clockwise")
+                        }
+                        .tint(.blue)
                     }
                 }
             }
@@ -88,14 +114,19 @@ struct LibraryView: View {
     @ViewBuilder
     private func status(for item: DownloadManager.Item) -> some View {
         switch item.state {
+        case .preparing:
+            Text("Hazırlanıyor")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         case .running:
-            Text(item.progress > 0 ? "%\(Int(item.progress * 100))" : FileStore.formattedSize(item.bytes))
+            Text("%\(Int(item.progress * 100))")
                 .font(.caption)
                 .monospacedDigit()
                 .foregroundStyle(.secondary)
         case .converting:
-            Text("MP4'e çevriliyor")
+            Text(item.isHLS ? "MP4 oluşturuluyor %\(Int(item.progress * 100))" : "Birleştiriliyor")
                 .font(.caption)
+                .monospacedDigit()
                 .foregroundStyle(.secondary)
         case .finished:
             Image(systemName: "checkmark.circle.fill")
@@ -104,7 +135,7 @@ struct LibraryView: View {
             Text(message)
                 .font(.caption)
                 .foregroundStyle(.red)
-                .lineLimit(2)
+                .lineLimit(3)
                 .multilineTextAlignment(.trailing)
         }
     }
