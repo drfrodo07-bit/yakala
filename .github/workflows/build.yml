@@ -1,4 +1,4 @@
-name: Yakala IPA
+name: iCatch IPA
 
 on:
   push:
@@ -88,21 +88,21 @@ jobs:
           test -d "$APP"
           mkdir -p Payload
           cp -R "$APP" Payload/
-          zip -qry Yakala.ipa Payload
-          ls -lh Yakala.ipa
+          zip -qry iCatch.ipa Payload
+          ls -lh iCatch.ipa
 
       - name: IPA'yı yükle
         uses: actions/upload-artifact@v4
         with:
-          name: Yakala-ipa
-          path: Yakala.ipa
+          name: iCatch-ipa
+          path: iCatch.ipa
 
       - name: Release oluştur (kolay indirme)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          name: Yakala (derleme ${{ github.run_number }})
+          name: iCatch (derleme ${{ github.run_number }})
           make_latest: true
           body: |
-            iPhone'a kurmak için **Yakala.ipa** dosyasını indirip Windows'ta Sideloadly ile yükleyin.
-          files: Yakala.ipa
+            iPhone'a kurmak için **iCatch.ipa** dosyasını indirip 3uTools ile imzalayıp yükleyin.
+          files: iCatch.ipa

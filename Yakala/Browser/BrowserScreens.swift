@@ -25,7 +25,7 @@ struct CaptureSheet: View {
                 if mainItems.isEmpty && adItems.isEmpty {
                     ContentUnavailableView("Henüz video yakalanmadı",
                                            systemImage: "film",
-                                           description: Text("Videoyu oynatmaya başlat; Yakala videoyu otomatik yakalar."))
+                                           description: Text("Videoyu oynatmaya başlat; iCatch videoyu otomatik yakalar."))
                 }
                 if !mainItems.isEmpty {
                     Section {
@@ -35,7 +35,7 @@ struct CaptureSheet: View {
                     } header: {
                         Text("Videolar")
                     } footer: {
-                        Text("İpucu: Reklamları geçip videoyu başlattıktan sonra tam ekran düğmesine basarsan video Yakala oynatıcısında İndir düğmesiyle açılır.")
+                        Text("İpucu: Reklamları geçip videoyu başlattıktan sonra tam ekran düğmesine basarsan video iCatch oynatıcısında İndir düğmesiyle açılır.")
                     }
                 }
                 if !adItems.isEmpty {
@@ -373,7 +373,7 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    Toggle("Tam ekranda Yakala oynatıcısını aç", isOn: $settings.takeoverPlayer)
+                    Toggle("Tam ekranda iCatch oynatıcısını aç", isOn: $settings.takeoverPlayer)
                     Toggle("Kısa videoları reklam say", isOn: $settings.hideShortVideos)
                     Picker("Aynı anda bağlantı", selection: $settings.connections) {
                         Text("4 (sakin)").tag(4)
@@ -383,7 +383,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Video ve indirme")
                 } footer: {
-                    Text("Tam ekran düğmesine basınca video, üstünde İndir düğmesi olan Yakala oynatıcısında açılır. Bağlantı sayısı arttıkça indirme hızlanır; bazı siteler çok bağlantıyı sınırlayabilir.")
+                    Text("Tam ekran düğmesine basınca video, üstünde İndir düğmesi olan iCatch oynatıcısında açılır. Bağlantı sayısı arttıkça indirme hızlanır; bazı siteler çok bağlantıyı sınırlayabilir.")
                 }
 
                 Section {

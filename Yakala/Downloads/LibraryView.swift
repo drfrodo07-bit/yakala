@@ -167,7 +167,7 @@ struct LibraryView: View {
             Text(title)
         } footer: {
             if !urls.isEmpty {
-                Text("Seçenekler için dosyaya basılı tut. Sola kaydırarak altyazı ekleyebilirsin. Dosyalar, Dosyalar uygulamasında “Yakala” klasöründe de görünür.")
+                Text("Seçenekler için dosyaya basılı tut. Sola kaydırarak altyazı ekleyebilirsin. Dosyalar, Dosyalar uygulamasında “iCatch” klasöründe de görünür.")
             }
         }
     }
@@ -293,7 +293,7 @@ struct LibraryView: View {
         Task { @MainActor in
             let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
             guard status == .authorized || status == .limited else {
-                alertMessage = "Fotoğraflar'a kaydetme izni verilmedi. Ayarlar > Yakala bölümünden izin verebilirsin."
+                alertMessage = "Fotoğraflar'a kaydetme izni verilmedi. Ayarlar > iCatch bölümünden izin verebilirsin."
                 return
             }
             do {

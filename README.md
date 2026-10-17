@@ -1,4 +1,4 @@
-# Yakala
+# iCatch
 
 iPhone için reklam engelleyicili tarayıcı, video yakalama/indirme ve otomatik altyazı uygulaması.
 
@@ -11,11 +11,11 @@ iPhone için reklam engelleyicili tarayıcı, video yakalama/indirme ve otomatik
 - **Hızlı indirme:** dosyalar 4 MB'lık parçalara bölünüp aynı anda 8 bağlantıyla iner; akışlar parça parça iner ve MP4'e dönüştürülür; arka planda devam eder
 - **Oynatıcı:** ortada büyük buton yok, ±10/15/30 sn atlama, çift dokunarak sarma, hız seçimi, kaldığın yerden devam
 - **Altyazı:** konuşulan dili otomatik algılar (Whisper), istenen dile çevirir (Apple Çeviri), düzenleme, SRT ve videoya gömme — hepsi telefonda
-- Telefonun açık/koyu görünümüne uyar; dosyalar Dosyalar uygulamasında **Yakala** klasöründe de görünür
+- Telefonun açık/koyu görünümüne uyar; dosyalar Dosyalar uygulamasında **iCatch** klasöründe de görünür
 
 ## iPhone'a kurulum (Windows)
 
-1. Bu repodaki **Releases** bölümünden en son **Yakala.ipa** dosyasını indir.
+1. Bu repodaki **Releases** bölümünden en son **iCatch.ipa** dosyasını indir.
 2. **3uTools** → Toolbox → **IPA Signature** → Apple ID ile imzala.
 3. İmzalı dosyayı 3uTools → Apps → **Install** ile telefona yükle.
 4. iPhone'da **Ayarlar > Gizlilik ve Güvenlik > Geliştirici Modu**'nu aç (telefon yeniden başlar).

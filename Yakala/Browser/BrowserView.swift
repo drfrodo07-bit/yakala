@@ -600,6 +600,17 @@ struct StartPageView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 26) {
+                HStack(spacing: 10) {
+                    Image("BrandIcon")
+                        .resizable()
+                        .frame(width: 34, height: 34)
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    Text("iCatch")
+                        .font(.title2.weight(.heavy))
+                    Spacer()
+                }
+                .padding(.top, 4)
+
                 if tab.isPrivate {
                     VStack(spacing: 8) {
                         Image(systemName: "hand.raised.fill")
@@ -607,7 +618,7 @@ struct StartPageView: View {
                             .foregroundStyle(.purple)
                         Text("Özel Dolaşma")
                             .font(.title2.bold())
-                        Text("Yakala, özel sekmelerde gittiğin sayfaları, arama geçmişini ve çerezleri sekmeleri kapattığında unutur. İndirdiğin dosyalar ise İndirilenler'de kalır.")
+                        Text("iCatch, özel sekmelerde gittiğin sayfaları, arama geçmişini ve çerezleri sekmeleri kapattığında unutur. İndirdiğin dosyalar ise İndirilenler'de kalır.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
