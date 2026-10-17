@@ -20,9 +20,17 @@ final class PlayerController: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var lastScrubSeek = Date.distantPast
 
-    init(url: URL) {
+    private let startTime: Double
+
+    init(url: URL, headers: [String: String] = [:], startTime: Double = 0) {
         self.url = url
-        let item = AVPlayerItem(url: url)
+        self.startTime = startTime
+        var options: [String: Any] = [:]
+        if !headers.isEmpty {
+            options["AVURLAssetHTTPHeaderFieldsKey"] = headers
+        }
+        let asset = AVURLAsset(url: url, options: options)
+        let item = AVPlayerItem(asset: asset)
         player = AVPlayer(playerItem: item)
         player.actionAtItemEnd = .pause
 
@@ -113,10 +121,15 @@ final class PlayerController: ObservableObject {
     }
 
     private func restorePosition() {
-        let saved = UserDefaults.standard.double(forKey: memoryKey)
         if let itemDuration = player.currentItem?.duration.seconds, itemDuration.isFinite {
             duration = itemDuration
         }
+        if startTime > 1 {
+            seek(to: startTime)
+            return
+        }
+        guard url.isFileURL else { return }
+        let saved = UserDefaults.standard.double(forKey: memoryKey)
         if saved > 5, duration <= 0 || saved < duration - 5 {
             seek(to: saved)
         }
@@ -124,7 +137,9 @@ final class PlayerController: ObservableObject {
 
     func teardown() {
         let position = currentTime
-        if duration > 0, position > 5, position < duration - 5 {
+        if !url.isFileURL {
+            // akış: konumu kaydetme
+        } else if duration > 0, position > 5, position < duration - 5 {
             UserDefaults.standard.set(position, forKey: memoryKey)
         } else {
             UserDefaults.standard.removeObject(forKey: memoryKey)
@@ -170,6 +185,8 @@ struct PlayerSurface: UIViewRepresentable {
 
 struct PlayerView: View {
     let url: URL
+    var title: String?
+    var onDownload: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
     @StateObject private var controller: PlayerController
@@ -179,6 +196,7 @@ struct PlayerView: View {
     @State private var flash: SeekFlash?
     @State private var hideTask: Task<Void, Never>?
     @State private var flashTask: Task<Void, Never>?
+    @State private var downloadStarted = false
 
     private static let intervals = [10, 15, 30]
     private static let rates: [Float] = [0.5, 0.75, 1, 1.25, 1.5, 2]
@@ -188,9 +206,11 @@ struct PlayerView: View {
         let text: String
     }
 
-    init(url: URL) {
+    init(url: URL, headers: [String: String] = [:], startTime: Double = 0, title: String? = nil, onDownload: (() -> Void)? = nil) {
         self.url = url
-        _controller = StateObject(wrappedValue: PlayerController(url: url))
+        self.title = title
+        self.onDownload = onDownload
+        _controller = StateObject(wrappedValue: PlayerController(url: url, headers: headers, startTime: startTime))
     }
 
     var body: some View {
@@ -289,11 +309,28 @@ struct PlayerView: View {
                     .frame(width: 32, height: 32)
             }
 
-            Text(url.deletingPathExtension().lastPathComponent)
+            Text(title ?? url.deletingPathExtension().lastPathComponent)
                 .font(.subheadline.weight(.medium))
                 .lineLimit(1)
 
             Spacer(minLength: 8)
+
+            if let onDownload {
+                Button {
+                    guard !downloadStarted else { return }
+                    onDownload()
+                    downloadStarted = true
+                    scheduleHide()
+                } label: {
+                    Label(downloadStarted ? "İndiriliyor" : "İndir",
+                          systemImage: downloadStarted ? "checkmark.circle.fill" : "arrow.down.circle.fill")
+                        .font(.footnote.weight(.bold))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 7)
+                        .background(Capsule().fill(downloadStarted ? Color.green : Color.accentColor))
+                }
+                .buttonStyle(.plain)
+            }
 
             Menu {
                 Picker("Atlama süresi", selection: $seekInterval) {

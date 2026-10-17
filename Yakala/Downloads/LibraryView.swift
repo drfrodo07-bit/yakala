@@ -8,7 +8,11 @@ struct PlayItem: Identifiable {
 
 struct LibraryView: View {
     @EnvironmentObject private var downloads: DownloadManager
-    var onAddSubtitles: (URL) -> Void
+    @EnvironmentObject private var subtitleJob: SubtitleJob
+    @Environment(\.dismiss) private var dismiss
+    var showsCloseButton = false
+
+    @State private var showStudio = false
 
     @State private var downloaded: [URL] = []
     @State private var subtitled: [URL] = []
@@ -32,6 +36,11 @@ struct LibraryView: View {
             }
             .navigationTitle("İndirilenler")
             .toolbar {
+                if showsCloseButton {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Kapat") { dismiss() }
+                    }
+                }
                 if downloads.items.contains(where: { !$0.isActive }) {
                     ToolbarItem(placement: .primaryAction) {
                         Button("Listeyi temizle") { downloads.clearFinished() }
@@ -42,6 +51,9 @@ struct LibraryView: View {
             .onChange(of: downloads.libraryVersion) { reload() }
             .fullScreenCover(item: $playing) { item in
                 PlayerView(url: item.url)
+            }
+            .sheet(isPresented: $showStudio) {
+                SubtitleStudioView(showsCloseButton: true)
             }
             .alert("Yeniden adlandır", isPresented: renamingBinding) {
                 TextField("Yeni ad", text: $newName)
@@ -185,7 +197,7 @@ struct LibraryView: View {
         .swipeActions(edge: .leading) {
             if FileStore.isVideo(url) {
                 Button {
-                    onAddSubtitles(url)
+                    addSubtitles(url)
                 } label: {
                     Label("Altyazı", systemImage: "captions.bubble")
                 }
@@ -202,7 +214,7 @@ struct LibraryView: View {
         .contextMenu {
             if FileStore.isVideo(url) {
                 Button {
-                    onAddSubtitles(url)
+                    addSubtitles(url)
                 } label: {
                     Label("Altyazı ekle", systemImage: "captions.bubble")
                 }
@@ -239,6 +251,11 @@ struct LibraryView: View {
 
     private var alertBinding: Binding<Bool> {
         Binding(get: { alertMessage != nil }, set: { if !$0 { alertMessage = nil } })
+    }
+
+    private func addSubtitles(_ url: URL) {
+        subtitleJob.select(video: url)
+        showStudio = true
     }
 
     private func reload() {

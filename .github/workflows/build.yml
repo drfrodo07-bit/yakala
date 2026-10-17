@@ -55,7 +55,20 @@ jobs:
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             grep -E "error:|fatal error" build.log | sort -u | head -80 | tee -a "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
-            tail -40 build.log
+            grep -E "error:|fatal error" build.log | sort -u | head -10 | while IFS= read -r line; do
+              echo "::error::$line"
+            done
+            # Hata kaydını ayrı bir dala yaz (okunabilsin diye)
+            grep -E "error:|fatal error|warning: .*Yakala/" build.log | sort -u | head -300 > build-errors.txt || true
+            tail -80 build.log >> build-errors.txt
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git fetch origin build-logs || true
+            git checkout -B build-logs
+            git rm -rq --cached . || true
+            git add -f build-errors.txt
+            git commit -qm "Derleme hataları ${GITHUB_SHA::7}" || true
+            git push -f origin build-logs || true
             exit $status
           fi
           grep -E "warning:" build.log | grep "/Yakala/" | sort -u | head -40 || true

@@ -1,37 +1,17 @@
 import SwiftUI
 import Translation
 
-enum AppTab: Hashable {
-    case browser
-    case library
-    case subtitles
-}
-
 struct ContentView: View {
-    @State private var selection: AppTab = .browser
-    @StateObject private var browser = BrowserModel()
     @StateObject private var subtitleJob = SubtitleJob()
+    @ObservedObject private var settings = BrowserSettings.shared
 
     var body: some View {
-        TabView(selection: $selection) {
-            BrowserView(model: browser)
-                .tabItem { Label("Tarayıcı", systemImage: "globe") }
-                .tag(AppTab.browser)
-
-            LibraryView { url in
-                subtitleJob.select(video: url)
-                selection = .subtitles
+        BrowserView()
+            .environmentObject(subtitleJob)
+            .preferredColorScheme(settings.appearance.colorScheme)
+            // Çeviri, ekran değişse de yarıda kalmasın diye en üst görünüme bağlı
+            .translationTask(subtitleJob.translationConfiguration) { [job = subtitleJob] session in
+                await job.translate(using: session)
             }
-            .tabItem { Label("İndirilenler", systemImage: "arrow.down.circle") }
-            .tag(AppTab.library)
-
-            SubtitleStudioView(job: subtitleJob)
-                .tabItem { Label("Altyazı", systemImage: "captions.bubble") }
-                .tag(AppTab.subtitles)
-        }
-        // Çeviri, sekme değiştirilse de yarıda kalmasın diye en üst görünüme bağlı
-        .translationTask(subtitleJob.translationConfiguration) { [job = subtitleJob] session in
-            await job.translate(using: session)
-        }
     }
 }

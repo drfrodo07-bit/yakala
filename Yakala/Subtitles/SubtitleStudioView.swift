@@ -20,7 +20,9 @@ struct PickedMovie: Transferable {
 }
 
 struct SubtitleStudioView: View {
-    @ObservedObject var job: SubtitleJob
+    @EnvironmentObject private var job: SubtitleJob
+    @Environment(\.dismiss) private var dismiss
+    var showsCloseButton = false
 
     @State private var showLibraryPicker = false
     @State private var photoItem: PhotosPickerItem?
@@ -40,6 +42,13 @@ struct SubtitleStudioView: View {
                 }
             }
             .navigationTitle("Altyazı")
+            .toolbar {
+                if showsCloseButton {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Kapat") { dismiss() }
+                    }
+                }
+            }
             .sheet(isPresented: $showLibraryPicker) {
                 LibraryVideoPicker { url in
                     job.select(video: url)
